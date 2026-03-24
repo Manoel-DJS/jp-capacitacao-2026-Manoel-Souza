@@ -1,9 +1,9 @@
-package jp_capacitacao_2026.controller;
+package jp_2026_Manoel_Souza.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jp_capacitacao_2026.model.Produtos;
-import jp_capacitacao_2026.service.ProdutosService;
+import jp_2026_Manoel_Souza.model.Produtos;
+import jp_2026_Manoel_Souza.service.ProdutosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

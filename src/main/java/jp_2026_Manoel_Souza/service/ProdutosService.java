@@ -1,10 +1,10 @@
-package jp_capacitacao_2026.service;
+package jp_2026_Manoel_Souza.service;
 
 
-import jp_capacitacao_2026.model.HistoricoPreco;
-import jp_capacitacao_2026.model.Produtos;
-import jp_capacitacao_2026.repository.HistoricoPrecoRepository;
-import jp_capacitacao_2026.repository.ProdutosRepository;
+import jp_2026_Manoel_Souza.model.HistoricoPreco;
+import jp_2026_Manoel_Souza.model.Produtos;
+import jp_2026_Manoel_Souza.repository.HistoricoPrecoRepository;
+import jp_2026_Manoel_Souza.repository.ProdutosRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

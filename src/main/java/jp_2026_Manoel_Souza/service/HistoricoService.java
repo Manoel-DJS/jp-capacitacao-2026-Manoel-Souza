@@ -1,7 +1,7 @@
-package jp_capacitacao_2026.service;
+package jp_2026_Manoel_Souza.service;
 
 
-import jp_capacitacao_2026.repository.HistoricoPrecoRepository;
+import jp_2026_Manoel_Souza.repository.HistoricoPrecoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

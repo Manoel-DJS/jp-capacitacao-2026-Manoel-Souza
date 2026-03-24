@@ -1,4 +1,4 @@
-package jp_capacitacao_2026;
+package jp_2026_Manoel_Souza;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

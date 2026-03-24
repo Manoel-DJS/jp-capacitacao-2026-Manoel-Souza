@@ -1,6 +1,6 @@
-package jp_capacitacao_2026.repository;
+package jp_2026_Manoel_Souza.repository;
 
-import jp_capacitacao_2026.model.HistoricoPreco;
+import jp_2026_Manoel_Souza.model.HistoricoPreco;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

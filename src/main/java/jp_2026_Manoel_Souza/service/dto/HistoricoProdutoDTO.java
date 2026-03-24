@@ -1,4 +1,4 @@
-package jp_capacitacao_2026.service.dto;
+package jp_2026_Manoel_Souza.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

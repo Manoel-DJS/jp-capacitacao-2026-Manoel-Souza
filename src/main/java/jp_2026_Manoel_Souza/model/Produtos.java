@@ -1,4 +1,4 @@
-package jp_capacitacao_2026.model;
+package jp_2026_Manoel_Souza.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
