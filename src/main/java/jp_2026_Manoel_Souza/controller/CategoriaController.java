@@ -1,6 +1,5 @@
 package jp_2026_Manoel_Souza.controller;
 
-
 import jakarta.validation.Valid;
 import java.util.List;
 
