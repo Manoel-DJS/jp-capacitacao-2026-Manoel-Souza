@@ -1,8 +1,9 @@
 package jp_2026_Manoel_Souza.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jp_2026_Manoel_Souza.model.Produtos;
+import jakarta.validation.Valid;
+import jp_2026_Manoel_Souza.dto.request.AtualizarProdutoRequest;
+import jp_2026_Manoel_Souza.dto.request.CriarProdutoRequest;
+import jp_2026_Manoel_Souza.dto.response.ProdutoResponse;
 import jp_2026_Manoel_Souza.service.ProdutosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,60 +14,47 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Produtos", description = "Endpoints para gerenciamento de produtos")
 @RequestMapping("/produtos")
 public class ProdutosController {
 
     private final ProdutosService produtosService;
 
-    //C
-
-    /**
-     * Recomendação de desenvolvimento, ampliar responses(responseEntity)
-     * possíveis além do ok.
-     */
-    @Operation(description = "Endpoint para criar um novo produto",
-            summary = "Criação de produto")
-    @PostMapping("/cria")
-    public ResponseEntity<Produtos> criarProduto(@RequestBody Produtos produto){
-        return ResponseEntity.ok(produtosService.createdProduto(produto));
+    @PostMapping
+    public ResponseEntity<ProdutoResponse> criarProduto(@Valid @RequestBody CriarProdutoRequest request) {
+        return ResponseEntity.ok(produtosService.createdProduto(request));
     }
 
-    /**
-     * GET
-     * localhost:9090/produtos
-     * @return
-     */
     @GetMapping
-    public ResponseEntity<List<Produtos>> getAll(){
+    public ResponseEntity<List<ProdutoResponse>> getAll() {
         return ResponseEntity.ok(produtosService.getAll());
     }
 
-    /**
-     * GET
-     * localhost:9090/produtos/1
-     * @return
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<Produtos> getById(@PathVariable Long id){
+    public ResponseEntity<ProdutoResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(produtosService.getById(id));
     }
 
-    //U
-    @PutMapping("/atualiza")
-    public ResponseEntity<Produtos> atualizarProduto(@RequestParam Long id,
-                                                     @RequestBody Produtos produto){
-        return ResponseEntity.ok(produtosService.atualiza(produto));
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ProdutoResponse>> buscar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) Long categoriaId
+    ) {
+        return ResponseEntity.ok(produtosService.buscar(nome, categoriaId));
     }
 
-    @PatchMapping("/atualiza-preco/{id}")
-    public ResponseEntity<Produtos> atualizarProdutoParcial(@PathVariable Long id,
-                                                     @RequestParam BigDecimal preco) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ProdutoResponse> atualizarProduto(@PathVariable Long id,
+                                                            @Valid @RequestBody AtualizarProdutoRequest request) {
+        return ResponseEntity.ok(produtosService.atualiza(id, request));
+    }
+
+    @PatchMapping("/{id}/preco")
+    public ResponseEntity<ProdutoResponse> atualizarProdutoParcial(@PathVariable Long id,
+                                                                   @RequestParam BigDecimal preco) {
         return ResponseEntity.ok(produtosService.atualizaPreco(id, preco));
     }
 
-    //Mudar para delete lógico
-    @DeleteMapping("/deleta/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarProduto(@PathVariable Long id) {
         produtosService.deletarProduto(id);
         return ResponseEntity.noContent().build();

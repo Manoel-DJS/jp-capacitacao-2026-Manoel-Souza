@@ -1,14 +1,21 @@
 package jp_2026_Manoel_Souza.service;
 
 
+import jp_2026_Manoel_Souza.dto.request.AtualizarProdutoRequest;
+import jp_2026_Manoel_Souza.dto.request.CriarProdutoRequest;
+import jp_2026_Manoel_Souza.dto.response.ProdutoResponse;
+import jp_2026_Manoel_Souza.mapper.ProdutoMapper;
+import jp_2026_Manoel_Souza.model.Categoria;
 import jp_2026_Manoel_Souza.model.HistoricoPreco;
 import jp_2026_Manoel_Souza.model.Produtos;
+import jp_2026_Manoel_Souza.repository.CategoriaRepository;
 import jp_2026_Manoel_Souza.repository.HistoricoPrecoRepository;
 import jp_2026_Manoel_Souza.repository.ProdutosRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,65 +23,111 @@ import java.util.List;
 public class ProdutosService {
 
     private final ProdutosRepository produtosRepository;
+    private final CategoriaRepository categoriaRepository;
     private final HistoricoPrecoRepository historicoPrecoRepository;
+    private final ProdutoMapper produtoMapper;
 
-    public List<Produtos> getAll() {
-        return produtosRepository.findAll();
+    public List<ProdutoResponse> getAll() {
+        List<Produtos> produtos = produtosRepository.findAll();
+        List<ProdutoResponse> response = new ArrayList<>();
+
+        for (Produtos produto : produtos) {
+            response.add(produtoMapper.paraResponse(produto));
+        }
+
+        return response;
     }
 
-    public Produtos createdProduto(Produtos produto) {
-        return produtosRepository.save(produto);
+    public ProdutoResponse getById(Long id) {
+        Produtos produto = buscarProduto(id);
+        return produtoMapper.paraResponse(produto);
     }
 
-    public Produtos atualiza(Produtos produto) {
-        return produtosRepository.save(produto);
+    public ProdutoResponse createdProduto(CriarProdutoRequest request) {
+        Categoria categoria = buscarCategoria(request.categoriaId());
+
+        Produtos produto = new Produtos();
+        produto.setNome(request.nome().trim());
+        produto.setDescricao(request.descricao());
+        produto.setPreco(request.preco());
+        produto.setCodigoBarras(request.codigoBarras());
+        produto.setCategoria(categoria);
+
+        produto = produtosRepository.save(produto);
+
+        return produtoMapper.paraResponse(produto);
+    }
+
+    public ProdutoResponse atualiza(Long id, AtualizarProdutoRequest request) {
+        Produtos produto = buscarProduto(id);
+        Categoria categoria = buscarCategoria(request.categoriaId());
+
+        produto.setNome(request.nome().trim());
+        produto.setDescricao(request.descricao());
+        produto.setPreco(request.preco());
+        produto.setCodigoBarras(request.codigoBarras());
+        produto.setCategoria(categoria);
+
+        produto = produtosRepository.save(produto);
+
+        return produtoMapper.paraResponse(produto);
     }
 
     public void deletarProduto(Long id) {
-        produtosRepository.deleteById(id);
+        Produtos produto = buscarProduto(id);
+        produtosRepository.delete(produto);
     }
 
-    public Produtos getById(Long id) {
-        return produtosRepository.findById(id).get();
-    }
+    public ProdutoResponse atualizaPreco(Long id, BigDecimal preco) {
+        Produtos produto = buscarProduto(id);
 
-    public Produtos atualizaPreco(Long id, BigDecimal preco) {
-//        Produtos produto = produtosRepository.findById(id).get();
-        final var produto = produtosRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-        produto.setPreco(preco);
-        /***
-         * Rastreabilidade
-         * 1 - Criar um log
-         * 2 - Adicionar em tabela historico de preços valores old e new
-         * para cada produto atualizado
-         * 3 - Antes de atualizar a tabela de produto, pegar o valor atual da tabela e adiconar
-         * na tabela historico
-         * 4 - Pegar novo valor da tabela e adicionar na tabela historico
-         * 5 - Sempre na tabela, adicionar novo registro após atualizar tabela de produto
-         * Estrutura da tabela historico de preços
-         * id
-         * id_produto
-         * preco_antigo
-         * preco_novo
-         * data_alteracao
-         */
-        final var historico = new HistoricoPreco();
-        historico.setPrecoAntigo(produto.getPreco());
+        if (preco == null || preco.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Preço deve ser maior que zero");
+        }
+
+        BigDecimal precoAntigo = produto.getPreco();
+
+        HistoricoPreco historico = new HistoricoPreco();
         historico.setProdutos(produto);
+        historico.setPrecoAntigo(precoAntigo);
         historico.setPrecoNovo(preco);
-        //Código abaixo pode ser substituido por @CreationTimestamp
-//        historico.setDataAlteracao(LocalDateTime.now());
-        historicoPrecoRepository.save(historico);
-        return produtosRepository.saveAndFlush(produto);
 
-        //Exemplo de não se fazer por gerar retrabalho
-//        final var historicoNovo = historicoPrecoRepository.findById(historico.getId()).get();
-//        historicoNovo.setPrecoNovo(preco);
-//        historicoPrecoRepository.save(historicoNovo);
-        /**
-         * get na tabela produtos para novo preço
-         */
-//        return produto;
+        produto.setPreco(preco);
+
+        historicoPrecoRepository.save(historico);
+        produto = produtosRepository.saveAndFlush(produto);
+
+        return produtoMapper.paraResponse(produto);
+    }
+
+    public List<ProdutoResponse> buscar(String nome, Long categoriaId) {
+        List<Produtos> produtos;
+        List<ProdutoResponse> response = new ArrayList<>();
+
+        if (nome != null && !nome.trim().isEmpty() && categoriaId != null) {
+            produtos = produtosRepository.findByNomeContainingIgnoreCaseAndCategoriaId(nome.trim(), categoriaId);
+        } else if (nome != null && !nome.trim().isEmpty()) {
+            produtos = produtosRepository.findByNomeContainingIgnoreCase(nome.trim());
+        } else if (categoriaId != null) {
+            produtos = produtosRepository.findByCategoriaId(categoriaId);
+        } else {
+            produtos = produtosRepository.findAll();
+        }
+
+        for (Produtos produto : produtos) {
+            response.add(produtoMapper.paraResponse(produto));
+        }
+
+        return response;
+    }
+
+    private Produtos buscarProduto(Long id) {
+        return produtosRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+    }
+
+    private Categoria buscarCategoria(Long categoriaId) {
+        return categoriaRepository.findById(categoriaId)
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
     }
 }
