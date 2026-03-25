@@ -28,7 +28,7 @@ public class ProdutosService {
     private final ProdutoMapper produtoMapper;
 
     public List<ProdutoResponse> getAll() {
-        List<Produtos> produtos = produtosRepository.findAll();
+        List<Produtos> produtos = produtosRepository.findByAtivoTrue();
         List<ProdutoResponse> response = new ArrayList<>();
 
         for (Produtos produto : produtos) {
@@ -39,7 +39,7 @@ public class ProdutosService {
     }
 
     public ProdutoResponse getById(Long id) {
-        Produtos produto = buscarProduto(id);
+        Produtos produto = buscarProdutoAtivo(id);
         return produtoMapper.paraResponse(produto);
     }
 
@@ -52,6 +52,7 @@ public class ProdutosService {
         produto.setPreco(request.preco());
         produto.setCodigoBarras(request.codigoBarras());
         produto.setCategoria(categoria);
+        produto.setAtivo(true);
 
         produto = produtosRepository.save(produto);
 
@@ -59,7 +60,7 @@ public class ProdutosService {
     }
 
     public ProdutoResponse atualiza(Long id, AtualizarProdutoRequest request) {
-        Produtos produto = buscarProduto(id);
+        Produtos produto = buscarProdutoAtivo(id);
         Categoria categoria = buscarCategoria(request.categoriaId());
 
         produto.setNome(request.nome().trim());
@@ -74,12 +75,13 @@ public class ProdutosService {
     }
 
     public void deletarProduto(Long id) {
-        Produtos produto = buscarProduto(id);
-        produtosRepository.delete(produto);
+        Produtos produto = buscarProdutoAtivo(id);
+        produto.setAtivo(false);
+        produtosRepository.save(produto);
     }
 
     public ProdutoResponse atualizaPreco(Long id, BigDecimal preco) {
-        Produtos produto = buscarProduto(id);
+        Produtos produto = buscarProdutoAtivo(id);
 
         if (preco == null || preco.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Preço deve ser maior que zero");
@@ -105,13 +107,13 @@ public class ProdutosService {
         List<ProdutoResponse> response = new ArrayList<>();
 
         if (nome != null && !nome.trim().isEmpty() && categoriaId != null) {
-            produtos = produtosRepository.findByNomeContainingIgnoreCaseAndCategoriaId(nome.trim(), categoriaId);
+            produtos = produtosRepository.findByNomeContainingIgnoreCaseAndCategoriaIdAndAtivoTrue(nome.trim(), categoriaId);
         } else if (nome != null && !nome.trim().isEmpty()) {
-            produtos = produtosRepository.findByNomeContainingIgnoreCase(nome.trim());
+            produtos = produtosRepository.findByNomeContainingIgnoreCaseAndAtivoTrue(nome.trim());
         } else if (categoriaId != null) {
-            produtos = produtosRepository.findByCategoriaId(categoriaId);
+            produtos = produtosRepository.findByCategoriaIdAndAtivoTrue(categoriaId);
         } else {
-            produtos = produtosRepository.findAll();
+            produtos = produtosRepository.findByAtivoTrue();
         }
 
         for (Produtos produto : produtos) {
@@ -121,9 +123,15 @@ public class ProdutosService {
         return response;
     }
 
-    private Produtos buscarProduto(Long id) {
-        return produtosRepository.findById(id)
+    private Produtos buscarProdutoAtivo(Long id) {
+        Produtos produto = produtosRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        if (!Boolean.TRUE.equals(produto.getAtivo())) {
+            throw new RuntimeException("Produto não encontrado");
+        }
+
+        return produto;
     }
 
     private Categoria buscarCategoria(Long categoriaId) {

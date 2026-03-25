@@ -31,6 +31,8 @@ public class Produtos {
     @Column(name = "codigo_barras")
     private String codigoBarras;
 
+    @Column(nullable = false)
+    private Boolean ativo = true;
     @ManyToOne
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
