@@ -6,8 +6,13 @@ public record ProdutoResponse(
         Long id,
         String nome,
         String descricao,
-        BigDecimal preco,
         String codigoBarras,
-        Long categoriaId
+        BigDecimal preco,
+        BigDecimal precoCusto,
+        Long categoriaId,
+        Integer quantidadeEstoque,
+        Integer estoqueMinimo,
+        Boolean estoqueBaixo,
+        Boolean ativo
 ) {
 }

@@ -49,9 +49,13 @@ public class ProdutosService {
         Produtos produto = new Produtos();
         produto.setNome(request.nome().trim());
         produto.setDescricao(request.descricao());
-        produto.setPreco(request.preco());
         produto.setCodigoBarras(request.codigoBarras());
+        produto.setPreco(request.preco());
+        produto.setPrecoCusto(request.precoCusto());
         produto.setCategoria(categoria);
+        produto.setQuantidadeEstoque(0);
+        produto.setEstoqueMinimo(request.estoqueMinimo());
+        produto.setEstoqueBaixo(false);
         produto.setAtivo(true);
 
         produto = produtosRepository.save(produto);
@@ -65,9 +69,12 @@ public class ProdutosService {
 
         produto.setNome(request.nome().trim());
         produto.setDescricao(request.descricao());
-        produto.setPreco(request.preco());
         produto.setCodigoBarras(request.codigoBarras());
+        produto.setPreco(request.preco());
+        produto.setPrecoCusto(request.precoCusto());
         produto.setCategoria(categoria);
+        produto.setEstoqueMinimo(request.estoqueMinimo());
+        produto.setEstoqueBaixo(produto.getQuantidadeEstoque() <= produto.getEstoqueMinimo());
 
         produto = produtosRepository.save(produto);
 

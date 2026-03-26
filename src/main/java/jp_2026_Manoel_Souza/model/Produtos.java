@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -20,20 +23,42 @@ public class Produtos {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String nome;
 
+    @Column(length = 255)
     private String descricao;
 
-    @Column(nullable = false)
-    private BigDecimal preco;
-
-    @Column(name = "codigo_barras")
+    @Column(name = "codigo_barras", length = 100)
     private String codigoBarras;
 
-    @Column(nullable = false)
-    private Boolean ativo = true;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal preco;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal precoCusto;
+
     @ManyToOne
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
+
+    @Column(nullable = false)
+    private Integer quantidadeEstoque = 0;
+
+    @Column(nullable = false)
+    private Integer estoqueMinimo = 0;
+
+    @Column(nullable = false)
+    private Boolean estoqueBaixo = false;
+
+    @Column(nullable = false)
+    private Boolean ativo = true;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false, name = "data_criacao")
+    private LocalDateTime dataCriacao;
+
+    @UpdateTimestamp
+    @Column(nullable = false, name = "data_atualizacao")
+    private LocalDateTime dataAtualizacao;
 }

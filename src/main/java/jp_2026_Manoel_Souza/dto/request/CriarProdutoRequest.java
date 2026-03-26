@@ -16,14 +16,21 @@ public record CriarProdutoRequest(
         @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres")
         String descricao,
 
-        @NotNull(message = "O preço do produto é obrigatório")
-        @DecimalMin(value = "0.01", message = "O preço do produto deve ser maior que zero")
-        BigDecimal preco,
-
         @Size(max = 100, message = "O código de barras deve ter no máximo 100 caracteres")
         String codigoBarras,
 
+        @NotNull(message = "O preço do produto é obrigatório")
+        @DecimalMin(value = "0.01", message = "O preço deve ser maior que zero")
+        BigDecimal preco,
+
+        @NotNull(message = "O preço de custo é obrigatório")
+        @DecimalMin(value = "0.01", message = "O preço de custo deve ser maior que zero")
+        BigDecimal precoCusto,
+
         @NotNull(message = "A categoria do produto é obrigatória")
-        Long categoriaId
+        Long categoriaId,
+
+        @NotNull(message = "O estoque mínimo é obrigatório")
+        Integer estoqueMinimo
 ) {
 }

@@ -18,9 +18,14 @@ public class ProdutoMapper {
                 produto.getId(),
                 produto.getNome(),
                 produto.getDescricao(),
-                produto.getPreco(),
                 produto.getCodigoBarras(),
-                categoriaId
+                produto.getPreco(),
+                produto.getPrecoCusto(),
+                categoriaId,
+                produto.getQuantidadeEstoque(),
+                produto.getEstoqueMinimo(),
+                produto.getEstoqueBaixo(),
+                produto.getAtivo()
         );
     }
 }
