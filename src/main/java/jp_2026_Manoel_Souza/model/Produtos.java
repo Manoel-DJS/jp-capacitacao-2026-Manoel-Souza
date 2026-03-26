@@ -61,4 +61,10 @@ public class Produtos {
     @UpdateTimestamp
     @Column(nullable = false, name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
+
+    @Column(nullable = false, precision = 3, scale = 2, name = "media_avaliacoes")
+    private BigDecimal mediaAvaliacoes = BigDecimal.ZERO;
+
+    @Column(nullable = false, name = "quantidade_avaliacoes")
+    private Integer quantidadeAvaliacoes = 0;
 }
