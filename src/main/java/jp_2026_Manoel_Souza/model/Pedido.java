@@ -43,6 +43,10 @@ public class Pedido {
     @Column(nullable = false, length = 255)
     private String endereco;
 
+    @ManyToOne
+    @JoinColumn(name = "promocao_id")
+    private Promocao promocao;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false, name = "data_criacao")
     private LocalDateTime dataCriacao;

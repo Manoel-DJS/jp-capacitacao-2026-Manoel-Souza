@@ -8,7 +8,9 @@ import jp_2026_Manoel_Souza.model.ItemCarrinho;
 import jp_2026_Manoel_Souza.model.ItemPedido;
 import jp_2026_Manoel_Souza.model.MovimentacaoEstoque;
 import jp_2026_Manoel_Souza.model.Pedido;
+import jp_2026_Manoel_Souza.model.Promocao;
 import jp_2026_Manoel_Souza.model.Produtos;
+import jp_2026_Manoel_Souza.model.UsoCupom;
 import jp_2026_Manoel_Souza.model.enums.StatusCarrinho;
 import jp_2026_Manoel_Souza.model.enums.StatusPedido;
 import jp_2026_Manoel_Souza.model.enums.TipoMovimentacaoEstoque;
@@ -17,7 +19,9 @@ import jp_2026_Manoel_Souza.repository.ItemCarrinhoRepository;
 import jp_2026_Manoel_Souza.repository.ItemPedidoRepository;
 import jp_2026_Manoel_Souza.repository.MovimentacaoEstoqueRepository;
 import jp_2026_Manoel_Souza.repository.PedidoRepository;
+import jp_2026_Manoel_Souza.repository.PromocaoRepository;
 import jp_2026_Manoel_Souza.repository.ProdutosRepository;
+import jp_2026_Manoel_Souza.repository.UsoCupomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,8 @@ public class PedidoService {
     private final ItemCarrinhoRepository itemCarrinhoRepository;
     private final ProdutosRepository produtosRepository;
     private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+    private final PromocaoRepository promocaoRepository;
+    private final UsoCupomRepository usoCupomRepository;
     private final PedidoMapper pedidoMapper;
 
     @Transactional
@@ -49,13 +55,17 @@ public class PedidoService {
 
         validarEstoqueItens(itensCarrinho);
 
-        BigDecimal desconto = request.desconto() == null ? BigDecimal.ZERO : request.desconto();
+        Promocao promocao = carrinho.getPromocao();
+        BigDecimal desconto = carrinho.getDescontoAplicado() == null
+                ? BigDecimal.ZERO
+                : carrinho.getDescontoAplicado();
+
         BigDecimal frete = request.frete() == null ? BigDecimal.ZERO : request.frete();
         BigDecimal valorItens = calcularValorItens(itensCarrinho);
         BigDecimal valorTotal = valorItens.subtract(desconto).add(frete);
 
         if (valorTotal.compareTo(BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("O valor total do pedido não pode ser negativo");
+            valorTotal = BigDecimal.ZERO;
         }
 
         Pedido pedido = new Pedido();
@@ -65,6 +75,7 @@ public class PedidoService {
         pedido.setFrete(frete);
         pedido.setValorTotal(valorTotal);
         pedido.setStatus(StatusPedido.CREATED);
+        pedido.setPromocao(promocao);
 
         pedido = pedidoRepository.save(pedido);
 
@@ -83,7 +94,11 @@ public class PedidoService {
             baixarEstoque(itemCarrinho.getProduto(), itemCarrinho.getQuantidade(), pedido.getId());
         }
 
+        consumirCupom(promocao, request.usuarioId());
+
         carrinho.setStatus(StatusCarrinho.FINALIZADO);
+        carrinho.setPromocao(null);
+        carrinho.setDescontoAplicado(BigDecimal.ZERO);
         carrinhoRepository.save(carrinho);
 
         return pedidoMapper.paraResponse(pedido, itensPedido);
@@ -231,6 +246,28 @@ public class PedidoService {
         movimentacao.setCriadoPor("sistema");
 
         movimentacaoEstoqueRepository.save(movimentacao);
+    }
+
+    private void consumirCupom(Promocao promocao, Long usuarioId) {
+        if (promocao == null) {
+            return;
+        }
+
+        if (promocao.getQuantidadeUsada() >= promocao.getLimiteUso()) {
+            throw new RuntimeException("Cupom atingiu o limite de uso");
+        }
+
+        if (usoCupomRepository.existsByPromocaoIdAndUsuarioId(promocao.getId(), usuarioId)) {
+            throw new RuntimeException("Cupom já utilizado pelo usuário");
+        }
+
+        UsoCupom usoCupom = new UsoCupom();
+        usoCupom.setPromocao(promocao);
+        usoCupom.setUsuarioId(usuarioId);
+        usoCupomRepository.save(usoCupom);
+
+        promocao.setQuantidadeUsada(promocao.getQuantidadeUsada() + 1);
+        promocaoRepository.save(promocao);
     }
 
     private void atualizarFlagEstoqueBaixo(Produtos produto) {

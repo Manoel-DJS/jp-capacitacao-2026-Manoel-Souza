@@ -13,8 +13,6 @@ public record CriarPedidoRequest(
         @NotBlank(message = "O endereço é obrigatório")
         String endereco,
 
-        BigDecimal desconto,
-
         BigDecimal frete
 ) {
 }

@@ -30,6 +30,12 @@ public class PedidoMapper {
             ));
         }
 
+        String codigoCupom = null;
+
+        if (pedido.getPromocao() != null) {
+            codigoCupom = pedido.getPromocao().getCodigo();
+        }
+
         return new PedidoResponse(
                 pedido.getId(),
                 pedido.getUsuarioId(),
@@ -38,6 +44,7 @@ public class PedidoMapper {
                 pedido.getFrete(),
                 pedido.getStatus().name(),
                 pedido.getEndereco(),
+                codigoCupom,
                 pedido.getDataCriacao(),
                 pedido.getDataAtualizacao(),
                 itensResponse

@@ -10,7 +10,6 @@ import jp_2026_Manoel_Souza.model.Categoria;
 import jp_2026_Manoel_Souza.model.ItemCarrinho;
 import jp_2026_Manoel_Souza.model.Promocao;
 import jp_2026_Manoel_Souza.model.Produtos;
-import jp_2026_Manoel_Souza.model.UsoCupom;
 import jp_2026_Manoel_Souza.model.enums.StatusCarrinho;
 import jp_2026_Manoel_Souza.model.enums.TipoPromocao;
 import jp_2026_Manoel_Souza.repository.CarrinhoRepository;
@@ -111,13 +110,9 @@ public class PromocaoService {
             valorFinal = BigDecimal.ZERO;
         }
 
-        UsoCupom usoCupom = new UsoCupom();
-        usoCupom.setPromocao(promocao);
-        usoCupom.setUsuarioId(request.usuarioId());
-        usoCupomRepository.save(usoCupom);
-
-        promocao.setQuantidadeUsada(promocao.getQuantidadeUsada() + 1);
-        promocaoRepository.save(promocao);
+        carrinho.setPromocao(promocao);
+        carrinho.setDescontoAplicado(valorDesconto);
+        carrinhoRepository.save(carrinho);
 
         return new CupomAplicadoResponse(
                 promocao.getCodigo(),
@@ -195,7 +190,8 @@ public class PromocaoService {
         BigDecimal desconto;
 
         if (promocao.getTipo() == TipoPromocao.PERCENTUAL) {
-            desconto = valorBase.multiply(promocao.getValor()).divide(BigDecimal.valueOf(100));
+            desconto = valorBase.multiply(promocao.getValor())
+                    .divide(BigDecimal.valueOf(100));
         } else {
             desconto = promocao.getValor();
         }

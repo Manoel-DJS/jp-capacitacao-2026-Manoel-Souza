@@ -15,7 +15,7 @@ public class CarrinhoMapper {
 
     public CarrinhoResponse paraResponse(Carrinho carrinho, List<ItemCarrinho> itensCarrinho) {
         List<ItemCarrinhoResponse> itensResponse = new ArrayList<>();
-        BigDecimal valorTotal = BigDecimal.ZERO;
+        BigDecimal totalItens = BigDecimal.ZERO;
 
         for (ItemCarrinho item : itensCarrinho) {
             BigDecimal subtotal = item.getPrecoMomento()
@@ -30,15 +30,33 @@ public class CarrinhoMapper {
                     subtotal
             ));
 
-            valorTotal = valorTotal.add(subtotal);
+            totalItens = totalItens.add(subtotal);
+        }
+
+        BigDecimal descontoAplicado = carrinho.getDescontoAplicado() == null
+                ? BigDecimal.ZERO
+                : carrinho.getDescontoAplicado();
+
+        BigDecimal valorFinal = totalItens.subtract(descontoAplicado);
+
+        if (valorFinal.compareTo(BigDecimal.ZERO) < 0) {
+            valorFinal = BigDecimal.ZERO;
+        }
+
+        String codigoCupom = null;
+
+        if (carrinho.getPromocao() != null) {
+            codigoCupom = carrinho.getPromocao().getCodigo();
         }
 
         return new CarrinhoResponse(
                 carrinho.getId(),
                 carrinho.getUsuarioId(),
                 carrinho.getStatus().name(),
+                codigoCupom,
+                descontoAplicado,
                 itensResponse,
-                valorTotal
+                valorFinal
         );
     }
 }

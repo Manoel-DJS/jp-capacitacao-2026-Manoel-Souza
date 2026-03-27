@@ -12,6 +12,7 @@ public record PedidoResponse(
         BigDecimal frete,
         String status,
         String endereco,
+        String codigoCupom,
         LocalDateTime dataCriacao,
         LocalDateTime dataAtualizacao,
         List<ItemPedidoResponse> itens

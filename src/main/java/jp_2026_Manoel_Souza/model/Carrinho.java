@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -29,6 +30,13 @@ public class Carrinho {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StatusCarrinho status;
+
+    @ManyToOne
+    @JoinColumn(name = "promocao_id")
+    private Promocao promocao;
+
+    @Column(nullable = false, precision = 10, scale = 2, name = "desconto_aplicado")
+    private BigDecimal descontoAplicado = BigDecimal.ZERO;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false, name = "data_criacao")

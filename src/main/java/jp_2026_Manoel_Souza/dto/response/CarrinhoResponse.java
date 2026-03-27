@@ -7,6 +7,8 @@ public record CarrinhoResponse(
         Long id,
         Long usuarioId,
         String status,
+        String codigoCupom,
+        BigDecimal descontoAplicado,
         List<ItemCarrinhoResponse> itens,
         BigDecimal valorTotal
 ) {
