@@ -21,4 +21,6 @@ public interface ProdutosRepository extends JpaRepository<Produtos, Long> {
     boolean existsByCodigoBarrasIgnoreCase(String codigoBarras);
 
     boolean existsByCodigoBarrasIgnoreCaseAndIdNot(String codigoBarras, Long id);
+
+    List<Produtos> findByAtivoTrueAndEstoqueBaixoTrueOrderByQuantidadeEstoqueAsc();
 }
