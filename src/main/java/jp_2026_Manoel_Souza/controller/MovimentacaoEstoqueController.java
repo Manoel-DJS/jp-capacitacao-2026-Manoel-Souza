@@ -1,6 +1,7 @@
 package jp_2026_Manoel_Souza.controller;
 
 import jakarta.validation.Valid;
+import jp_2026_Manoel_Souza.config.MovimentacaoEstoqueControllerDocs;
 import jp_2026_Manoel_Souza.dto.request.AjustarEstoqueRequest;
 import jp_2026_Manoel_Souza.dto.request.MovimentarEstoqueRequest;
 import jp_2026_Manoel_Souza.dto.response.EstoqueProdutoResponse;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/estoque")
-public class MovimentacaoEstoqueController {
+public class MovimentacaoEstoqueController implements MovimentacaoEstoqueControllerDocs {
 
     private final MovimentacaoEstoqueService movimentacaoEstoqueService;
 

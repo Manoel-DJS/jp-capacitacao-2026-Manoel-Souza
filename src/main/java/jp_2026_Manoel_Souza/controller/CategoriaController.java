@@ -3,6 +3,7 @@ package jp_2026_Manoel_Souza.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 
+import jp_2026_Manoel_Souza.config.CategoriaControllerDocs;
 import jp_2026_Manoel_Souza.dto.request.AtualizarCategoriaRequest;
 import jp_2026_Manoel_Souza.dto.request.CriarCategoriaRequest;
 import jp_2026_Manoel_Souza.dto.response.CategoriaResponse;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/categorias")
 @RequiredArgsConstructor
-public class CategoriaController {
+public class CategoriaController implements CategoriaControllerDocs {
 
     private final CategoriaService categoriaService;
 

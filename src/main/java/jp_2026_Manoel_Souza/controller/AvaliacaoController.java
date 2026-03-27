@@ -1,6 +1,7 @@
 package jp_2026_Manoel_Souza.controller;
 
 import jakarta.validation.Valid;
+import jp_2026_Manoel_Souza.config.AvaliacaoControllerDocs;
 import jp_2026_Manoel_Souza.dto.request.CriarAvaliacaoRequest;
 import jp_2026_Manoel_Souza.dto.response.AvaliacaoResponse;
 import jp_2026_Manoel_Souza.dto.response.AvaliacoesProdutoResponse;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/avaliacoes")
-public class AvaliacaoController {
+public class AvaliacaoController implements AvaliacaoControllerDocs {
 
     private final AvaliacaoService avaliacaoService;
 

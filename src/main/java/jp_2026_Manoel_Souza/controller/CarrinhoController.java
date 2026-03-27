@@ -1,6 +1,7 @@
 package jp_2026_Manoel_Souza.controller;
 
 import jakarta.validation.Valid;
+import jp_2026_Manoel_Souza.config.CarrinhoControllerDocs;
 import jp_2026_Manoel_Souza.dto.request.AdicionarItemCarrinhoRequest;
 import jp_2026_Manoel_Souza.dto.request.AtualizarItemCarrinhoRequest;
 import jp_2026_Manoel_Souza.dto.response.CarrinhoResponse;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/carrinho")
-public class CarrinhoController {
+public class CarrinhoController implements CarrinhoControllerDocs {
 
     private final CarrinhoService carrinhoService;
 

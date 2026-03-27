@@ -1,6 +1,7 @@
 package jp_2026_Manoel_Souza.controller;
 
 import jakarta.validation.Valid;
+import jp_2026_Manoel_Souza.config.ProdutosControllerDocs;
 import jp_2026_Manoel_Souza.dto.request.AtualizarProdutoRequest;
 import jp_2026_Manoel_Souza.dto.request.CriarProdutoRequest;
 import jp_2026_Manoel_Souza.dto.response.ProdutoResponse;
@@ -15,7 +16,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/produtos")
-public class ProdutosController {
+public class ProdutosController implements ProdutosControllerDocs {
 
     private final ProdutosService produtosService;
 

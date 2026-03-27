@@ -1,6 +1,7 @@
 package jp_2026_Manoel_Souza.controller;
 
 import jakarta.validation.Valid;
+import jp_2026_Manoel_Souza.config.PedidoControllerDocs;
 import jp_2026_Manoel_Souza.dto.request.CriarPedidoRequest;
 import jp_2026_Manoel_Souza.dto.response.PedidoResponse;
 import jp_2026_Manoel_Souza.service.PedidoService;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/pedidos")
-public class PedidoController {
+public class PedidoController implements PedidoControllerDocs {
 
     private final PedidoService pedidoService;
 

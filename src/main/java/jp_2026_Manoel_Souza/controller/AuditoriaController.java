@@ -1,5 +1,6 @@
 package jp_2026_Manoel_Souza.controller;
 
+import jp_2026_Manoel_Souza.config.AuditoriaControllerDocs;
 import jp_2026_Manoel_Souza.dto.response.AuditoriaResponse;
 import jp_2026_Manoel_Souza.service.AuditoriaService;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auditorias")
-public class AuditoriaController {
+public class AuditoriaController implements AuditoriaControllerDocs {
 
     private final AuditoriaService auditoriaService;
 

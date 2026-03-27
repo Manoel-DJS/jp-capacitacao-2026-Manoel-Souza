@@ -1,6 +1,7 @@
 package jp_2026_Manoel_Souza.controller;
 
 import jakarta.validation.Valid;
+import jp_2026_Manoel_Souza.config.PromocaoControllerDocs;
 import jp_2026_Manoel_Souza.dto.request.AplicarCupomRequest;
 import jp_2026_Manoel_Souza.dto.request.CriarPromocaoRequest;
 import jp_2026_Manoel_Souza.dto.response.CupomAplicadoResponse;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping
-public class PromocaoController {
+public class PromocaoController implements PromocaoControllerDocs {
 
     private final PromocaoService promocaoService;
 

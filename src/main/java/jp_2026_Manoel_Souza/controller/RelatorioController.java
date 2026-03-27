@@ -1,5 +1,6 @@
 package jp_2026_Manoel_Souza.controller;
 
+import jp_2026_Manoel_Souza.config.RelatorioControllerDocs;
 import jp_2026_Manoel_Souza.dto.response.ProdutoEstoqueBaixoResponse;
 import jp_2026_Manoel_Souza.dto.response.ProdutoMaisVendidoResponse;
 import jp_2026_Manoel_Souza.dto.response.PromocaoMaisUtilizadaResponse;
@@ -15,7 +16,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/relatorios")
-public class RelatorioController {
+public class RelatorioController implements RelatorioControllerDocs {
 
     private final RelatorioService relatorioService;
 
