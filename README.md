@@ -270,11 +270,17 @@ git clone <repo>
 No `application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/seu_banco
-spring.datasource.username=root
-spring.datasource.password=senha
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
+spring.datasource.username=seu_usuario
+spring.datasource.password=sua_senha
 
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+
+spring.jpa.database-platform=org.hibernate.dialect.OracleDialect
 spring.jpa.hibernate.ddl-auto=update
+
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
 ```
 
 ### 3. Rodar aplicação
