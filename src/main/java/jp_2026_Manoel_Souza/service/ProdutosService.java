@@ -4,6 +4,9 @@ package jp_2026_Manoel_Souza.service;
 import jp_2026_Manoel_Souza.dto.request.AtualizarProdutoRequest;
 import jp_2026_Manoel_Souza.dto.request.CriarProdutoRequest;
 import jp_2026_Manoel_Souza.dto.response.ProdutoResponse;
+import jp_2026_Manoel_Souza.exception.ProdutoNaoEncontradoException;
+import jp_2026_Manoel_Souza.exception.RecursoNaoEncontradoException;
+import jp_2026_Manoel_Souza.exception.RegraDeNegocioException;
 import jp_2026_Manoel_Souza.mapper.ProdutoMapper;
 import jp_2026_Manoel_Souza.model.Categoria;
 import jp_2026_Manoel_Souza.model.HistoricoPreco;
@@ -28,14 +31,10 @@ public class ProdutosService {
     private final ProdutoMapper produtoMapper;
 
     public List<ProdutoResponse> getAll() {
-        List<Produtos> produtos = produtosRepository.findByAtivoTrue();
-        List<ProdutoResponse> response = new ArrayList<>();
-
-        for (Produtos produto : produtos) {
-            response.add(produtoMapper.paraResponse(produto));
-        }
-
-        return response;
+        return produtosRepository.findByAtivoTrue()
+                .stream()
+                .map(produtoMapper::paraResponse)
+                .toList();
     }
 
     public ProdutoResponse getById(Long id) {
@@ -91,7 +90,7 @@ public class ProdutosService {
         Produtos produto = buscarProdutoAtivo(id);
 
         if (preco == null || preco.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Preço deve ser maior que zero");
+            throw new RegraDeNegocioException("Preço deve ser maior que zero.");
         }
 
         BigDecimal precoAntigo = produto.getPreco();
@@ -132,10 +131,10 @@ public class ProdutosService {
 
     private Produtos buscarProdutoAtivo(Long id) {
         Produtos produto = produtosRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado com o ID: " + id));
 
         if (!Boolean.TRUE.equals(produto.getAtivo())) {
-            throw new RuntimeException("Produto não encontrado");
+            throw new ProdutoNaoEncontradoException("Produto não encontrado com o ID: " + id);
         }
 
         return produto;
@@ -143,6 +142,6 @@ public class ProdutosService {
 
     private Categoria buscarCategoria(Long categoriaId) {
         return categoriaRepository.findById(categoriaId)
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada com o ID: " + categoriaId));
     }
 }

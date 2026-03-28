@@ -57,7 +57,7 @@ public class AuditoriaService {
         try {
             return objectMapper.writeValueAsString(objeto);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Erro ao converter auditoria para JSON");
+            throw new RuntimeException("Erro ao converter objeto de auditoria para JSON", e);
         }
     }
 }

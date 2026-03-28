@@ -4,6 +4,9 @@ import jp_2026_Manoel_Souza.dto.request.AplicarCupomRequest;
 import jp_2026_Manoel_Souza.dto.request.CriarPromocaoRequest;
 import jp_2026_Manoel_Souza.dto.response.CupomAplicadoResponse;
 import jp_2026_Manoel_Souza.dto.response.PromocaoResponse;
+import jp_2026_Manoel_Souza.exception.DuplicidadeException;
+import jp_2026_Manoel_Souza.exception.RecursoNaoEncontradoException;
+import jp_2026_Manoel_Souza.exception.RegraDeNegocioException;
 import jp_2026_Manoel_Souza.mapper.PromocaoMapper;
 import jp_2026_Manoel_Souza.model.Carrinho;
 import jp_2026_Manoel_Souza.model.Categoria;
@@ -44,15 +47,15 @@ public class PromocaoService {
         String codigo = request.codigo().trim();
 
         if (promocaoRepository.existsByCodigoIgnoreCase(codigo)) {
-            throw new RuntimeException("Já existe promoção com esse código");
+            throw new DuplicidadeException("Já existe uma promoção com o código informado.");
         }
 
         if (request.dataFim().isBefore(request.dataInicio())) {
-            throw new RuntimeException("A data fim deve ser maior que a data início");
+            throw new RegraDeNegocioException("A data final deve ser posterior à data de início.");
         }
 
         if (request.produtoId() != null && request.categoriaId() != null) {
-            throw new RuntimeException("Informe somente produto ou categoria");
+            throw new RegraDeNegocioException("A promoção deve ser associada a um produto ou a uma categoria, não a ambos.");
         }
 
         Produtos produto = null;
@@ -60,12 +63,12 @@ public class PromocaoService {
 
         if (request.produtoId() != null) {
             produto = produtosRepository.findByIdAndAtivoTrue(request.produtoId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado com o ID: " + request.produtoId()));
         }
 
         if (request.categoriaId() != null) {
             categoria = categoriaRepository.findById(request.categoriaId())
-                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada com o ID: " + request.categoriaId()));
         }
 
         Promocao promocao = new Promocao();
@@ -92,13 +95,13 @@ public class PromocaoService {
         List<ItemCarrinho> itensCarrinho = itemCarrinhoRepository.findByCarrinhoId(carrinho.getId());
 
         if (itensCarrinho.isEmpty()) {
-            throw new RuntimeException("Carrinho vazio");
+            throw new RegraDeNegocioException("Não é possível aplicar cupom em um carrinho vazio.");
         }
 
         List<ItemCarrinho> itensValidos = buscarItensValidos(promocao, itensCarrinho);
 
         if (itensValidos.isEmpty()) {
-            throw new RuntimeException("Cupom sem relação com os produtos do carrinho");
+            throw new RegraDeNegocioException("Este cupom não é válido para os produtos no carrinho.");
         }
 
         BigDecimal valorCarrinho = somarItens(itensCarrinho);
@@ -125,28 +128,28 @@ public class PromocaoService {
 
     private Promocao buscarPromocaoAtiva(String codigo) {
         return promocaoRepository.findByCodigoIgnoreCaseAndAtivoTrue(codigo.trim())
-                .orElseThrow(() -> new RuntimeException("Cupom não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Cupom não encontrado com o código: " + codigo));
     }
 
     private void validarPromocao(Promocao promocao, Long usuarioId) {
         LocalDateTime agora = LocalDateTime.now();
 
         if (agora.isBefore(promocao.getDataInicio()) || agora.isAfter(promocao.getDataFim())) {
-            throw new RuntimeException("Cupom expirado ou fora do período de validade");
+            throw new RegraDeNegocioException("Cupom expirado ou fora do período de validade.");
         }
 
         if (promocao.getQuantidadeUsada() >= promocao.getLimiteUso()) {
-            throw new RuntimeException("Cupom atingiu o limite de uso");
+            throw new RegraDeNegocioException("Este cupom atingiu o limite de usos.");
         }
 
         if (usoCupomRepository.existsByPromocaoIdAndUsuarioId(promocao.getId(), usuarioId)) {
-            throw new RuntimeException("Cupom já utilizado pelo usuário");
+            throw new RegraDeNegocioException("Este cupom já foi utilizado por você.");
         }
     }
 
     private Carrinho buscarCarrinhoAtivo(Long usuarioId) {
         return carrinhoRepository.findByUsuarioIdAndStatus(usuarioId, StatusCarrinho.ATIVO)
-                .orElseThrow(() -> new RuntimeException("Carrinho ativo não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Carrinho ativo não encontrado para o usuário ID: " + usuarioId));
     }
 
     private List<ItemCarrinho> buscarItensValidos(Promocao promocao, List<ItemCarrinho> itensCarrinho) {
@@ -207,7 +210,7 @@ public class PromocaoService {
         try {
             return TipoPromocao.valueOf(tipo.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Tipo de promoção inválido");
+            throw new RegraDeNegocioException("Tipo de promoção inválido: " + tipo);
         }
     }
 }

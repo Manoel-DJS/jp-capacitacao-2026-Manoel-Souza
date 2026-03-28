@@ -3,6 +3,9 @@ package jp_2026_Manoel_Souza.service;
 import jp_2026_Manoel_Souza.dto.request.AdicionarItemCarrinhoRequest;
 import jp_2026_Manoel_Souza.dto.request.AtualizarItemCarrinhoRequest;
 import jp_2026_Manoel_Souza.dto.response.CarrinhoResponse;
+import jp_2026_Manoel_Souza.exception.EstoqueInsuficienteException;
+import jp_2026_Manoel_Souza.exception.ProdutoNaoEncontradoException;
+import jp_2026_Manoel_Souza.exception.RecursoNaoEncontradoException;
 import jp_2026_Manoel_Souza.mapper.CarrinhoMapper;
 import jp_2026_Manoel_Souza.model.Carrinho;
 import jp_2026_Manoel_Souza.model.ItemCarrinho;
@@ -104,17 +107,17 @@ public class CarrinhoService {
 
     private Produtos buscarProdutoAtivo(Long produtoId) {
         return produtosRepository.findByIdAndAtivoTrue(produtoId)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado com o ID: " + produtoId));
     }
 
     private ItemCarrinho buscarItemCarrinho(Long itemId) {
         return itemCarrinhoRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item do carrinho não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item do carrinho não encontrado com o ID: " + itemId));
     }
 
     private void validarEstoque(Produtos produto, Integer quantidadeSolicitada) {
         if (produto.getQuantidadeEstoque() < quantidadeSolicitada) {
-            throw new RuntimeException("Estoque insuficiente");
+            throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produto.getNome());
         }
     }
 }

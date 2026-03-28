@@ -2,6 +2,9 @@ package jp_2026_Manoel_Souza.service;
 
 import jp_2026_Manoel_Souza.dto.request.CriarPedidoRequest;
 import jp_2026_Manoel_Souza.dto.response.PedidoResponse;
+import jp_2026_Manoel_Souza.exception.EstoqueInsuficienteException;
+import jp_2026_Manoel_Souza.exception.RecursoNaoEncontradoException;
+import jp_2026_Manoel_Souza.exception.RegraDeNegocioException;
 import jp_2026_Manoel_Souza.mapper.PedidoMapper;
 import jp_2026_Manoel_Souza.model.Carrinho;
 import jp_2026_Manoel_Souza.model.ItemCarrinho;
@@ -50,7 +53,7 @@ public class PedidoService {
         List<ItemCarrinho> itensCarrinho = itemCarrinhoRepository.findByCarrinhoId(carrinho.getId());
 
         if (itensCarrinho.isEmpty()) {
-            throw new RuntimeException("Carrinho vazio");
+            throw new RegraDeNegocioException("Não é possível criar um pedido a partir de um carrinho vazio.");
         }
 
         validarEstoqueItens(itensCarrinho);
@@ -116,7 +119,7 @@ public class PedidoService {
         Pedido pedido = buscarPedido(id);
 
         if (pedido.getStatus() != StatusPedido.CREATED && pedido.getStatus() != StatusPedido.PAID) {
-            throw new RuntimeException("Cancelamento permitido somente para pedidos CREATED ou PAID");
+            throw new RegraDeNegocioException("Cancelamento permitido somente para pedidos com status CRIADO ou PAGO.");
         }
 
         List<ItemPedido> itensPedido = itemPedidoRepository.findByPedidoId(pedido.getId());
@@ -136,7 +139,7 @@ public class PedidoService {
         Pedido pedido = buscarPedido(id);
 
         if (pedido.getStatus() != StatusPedido.CREATED) {
-            throw new RuntimeException("Somente pedidos CREATED podem ser marcados como PAID");
+            throw new RegraDeNegocioException("Somente pedidos com status CRIADO podem ser marcados como PAGOS.");
         }
 
         pedido.setStatus(StatusPedido.PAID);
@@ -152,7 +155,7 @@ public class PedidoService {
         Pedido pedido = buscarPedido(id);
 
         if (pedido.getStatus() != StatusPedido.PAID) {
-            throw new RuntimeException("Somente pedidos PAID podem ser marcados como SHIPPED");
+            throw new RegraDeNegocioException("Somente pedidos com status PAGO podem ser marcados como ENVIADOS.");
         }
 
         pedido.setStatus(StatusPedido.SHIPPED);
@@ -168,7 +171,7 @@ public class PedidoService {
         Pedido pedido = buscarPedido(id);
 
         if (pedido.getStatus() != StatusPedido.SHIPPED) {
-            throw new RuntimeException("Somente pedidos SHIPPED podem ser marcados como DELIVERED");
+            throw new RegraDeNegocioException("Somente pedidos com status ENVIADO podem ser marcados como ENTREGUES.");
         }
 
         pedido.setStatus(StatusPedido.DELIVERED);
@@ -181,12 +184,12 @@ public class PedidoService {
 
     private Pedido buscarPedido(Long id) {
         return pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pedido não encontrado com o ID: " + id));
     }
 
     private Carrinho buscarCarrinhoAtivo(Long usuarioId) {
         return carrinhoRepository.findByUsuarioIdAndStatus(usuarioId, StatusCarrinho.ATIVO)
-                .orElseThrow(() -> new RuntimeException("Carrinho ativo não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Carrinho ativo não encontrado para o usuário ID: " + usuarioId));
     }
 
     private void validarEstoqueItens(List<ItemCarrinho> itensCarrinho) {
@@ -194,11 +197,11 @@ public class PedidoService {
             Produtos produto = itemCarrinho.getProduto();
 
             if (!Boolean.TRUE.equals(produto.getAtivo())) {
-                throw new RuntimeException("Produto inativo no carrinho");
+                throw new RegraDeNegocioException("Produto '" + produto.getNome() + "' está inativo e não pode ser comprado.");
             }
 
             if (produto.getQuantidadeEstoque() < itemCarrinho.getQuantidade()) {
-                throw new RuntimeException("Estoque insuficiente para o produto: " + produto.getNome());
+                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produto.getNome());
             }
         }
     }
@@ -254,11 +257,11 @@ public class PedidoService {
         }
 
         if (promocao.getQuantidadeUsada() >= promocao.getLimiteUso()) {
-            throw new RuntimeException("Cupom atingiu o limite de uso");
+            throw new RegraDeNegocioException("Cupom '" + promocao.getCodigo() + "' atingiu o limite de uso.");
         }
 
         if (usoCupomRepository.existsByPromocaoIdAndUsuarioId(promocao.getId(), usuarioId)) {
-            throw new RuntimeException("Cupom já utilizado pelo usuário");
+            throw new RegraDeNegocioException("Cupom '" + promocao.getCodigo() + "' já foi utilizado por este usuário.");
         }
 
         UsoCupom usoCupom = new UsoCupom();

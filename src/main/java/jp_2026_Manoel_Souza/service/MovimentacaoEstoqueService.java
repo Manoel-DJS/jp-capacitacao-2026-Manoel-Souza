@@ -4,6 +4,9 @@ import jp_2026_Manoel_Souza.dto.request.AjustarEstoqueRequest;
 import jp_2026_Manoel_Souza.dto.request.MovimentarEstoqueRequest;
 import jp_2026_Manoel_Souza.dto.response.EstoqueProdutoResponse;
 import jp_2026_Manoel_Souza.dto.response.MovimentacaoEstoqueResponse;
+import jp_2026_Manoel_Souza.exception.EstoqueInsuficienteException;
+import jp_2026_Manoel_Souza.exception.ProdutoNaoEncontradoException;
+import jp_2026_Manoel_Souza.exception.RegraDeNegocioException;
 import jp_2026_Manoel_Souza.mapper.MovimentacaoEstoqueMapper;
 import jp_2026_Manoel_Souza.model.MovimentacaoEstoque;
 import jp_2026_Manoel_Souza.model.Produtos;
@@ -41,7 +44,7 @@ public class MovimentacaoEstoqueService {
         Produtos produto = buscarProdutoAtivo(produtoId);
 
         if (produto.getQuantidadeEstoque() < request.quantidade()) {
-            throw new RuntimeException("Estoque insuficiente");
+            throw new EstoqueInsuficienteException("Estoque insuficiente para remover a quantidade solicitada.");
         }
 
         produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - request.quantidade());
@@ -72,7 +75,7 @@ public class MovimentacaoEstoqueService {
 
     private Produtos buscarProdutoAtivo(Long produtoId) {
         return produtosRepository.findByIdAndAtivoTrue(produtoId)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado com o ID: " + produtoId));
     }
 
     private void atualizarFlagEstoqueBaixo(Produtos produto) {
@@ -99,7 +102,7 @@ public class MovimentacaoEstoqueService {
         Integer quantidadeAtual = produto.getQuantidadeEstoque();
 
         if (quantidadeAtual.equals(request.novaQuantidade())) {
-            throw new RuntimeException("A nova quantidade deve ser diferente da quantidade atual");
+            throw new RegraDeNegocioException("A nova quantidade deve ser diferente da quantidade atual.");
         }
 
         Integer diferenca = Math.abs(request.novaQuantidade() - quantidadeAtual);

@@ -48,14 +48,9 @@ public class CategoriaService {
     }
 
     public List<CategoriaResponse> listar() {
-        List<Categoria> categorias = categoriaRepository.findAll();
-        List<CategoriaResponse> response = new ArrayList<>();
-
-        for (Categoria categoria : categorias) {
-            response.add(categoriaMapper.paraResponse(categoria));
-        }
-
-        return response;
+        return categoriaRepository.findAll().stream()
+                .map(categoriaMapper::paraResponse)
+                .toList();
     }
 
     public CategoriaResponse buscarPorId(Long id) {
