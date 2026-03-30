@@ -21,7 +21,7 @@ O sistema foi projetado com foco em **regras de negócio reais**, garantindo con
 * Spring Boot
 * Spring Data JPA
 * Hibernate
-* MySQL
+* Oracle DB
 * Lombok
 * Swagger (OpenAPI)
 
